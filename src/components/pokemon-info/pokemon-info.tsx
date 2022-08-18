@@ -38,19 +38,17 @@ type PokeDetails = {
 export const Info = () => {
     
     const { id, name, url } = usePoke();
-    const [data, setDATA] = useState('');
+    const [data, setData] = useState('');
     const [abilities, setAbilities] = useState(['']);
     const [moves, setMoves] = useState(['']);
 
     useEffect(() => {
         //Async API call to pull in array of objects to display
         async function fetchData() {
-            
-            //console.log(await fetch(url));
             const pokeData = await fetch(url);
             const results: PokeDetails = await pokeData.json();
             setAbilities(results.abilities.map(item => item.ability.name))
-            setDATA(results.sprites.front_shiny);
+            setData(results.sprites.front_shiny);
             setMoves(results.moves.map(item => item.move.name));
         }
         fetchData()

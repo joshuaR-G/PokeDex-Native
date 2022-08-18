@@ -699,3 +699,4 @@ export const Pokemons = [
   },
   { "id": 151, "name": "mew", "url": "https://pokeapi.co/api/v2/pokemon/151/" }
 ]
+

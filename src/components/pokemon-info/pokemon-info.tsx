@@ -27,12 +27,21 @@ type Move = {
     name: string;
   };
 };
+
+type Form = {
+  form: {
+    name: string;
+  };
+};
+
 type PokeDetails = {
+  id: number;
   abilities: Ability[];
+  moves: Move[];
+  forms: Form[];
   sprites: {
     front_shiny: string;
   };
-  moves: Move[];
 };
 
 const Item = ({ name }: { name: string }) => (
@@ -41,68 +50,46 @@ const Item = ({ name }: { name: string }) => (
   </View>
 );
 
-const PokemonPage = ({
-  name,
-  id,
-  abilities,
-  moves,
-  data
-}: {
-  name: string;
-  id: number;
-  abilities: string[];
-  moves: string[];
-  data: string;
-}) => {
+const PokemonPage = ({ pokemon }: { pokemon: PokeDetails }) => {
   const renderItem = ({ item }: { item: string }) => <Item name={item} />;
 
   return (
     <View style={styles.container}>
-      <Text>{id}</Text>
-      <Text>{name}</Text>
-      <Text>{abilities}</Text>
-      <FlatList
-        data={moves}
-        renderItem={renderItem}
-        keyExtractor={(moveName) => moveName}
-      />
-
+      <Text>{pokemon.id}</Text>
+      <Text>{pokemon.forms.map((f) => f.name).join(', ')} </Text>
+      <Text>{pokemon.abilities.map((item) => item.ability.name)}</Text>
       <Image
         style={styles.tinyLogo}
         source={{
-          uri: data
+          uri: pokemon.sprites.front_shiny
         }}
+      />
+      <FlatList
+        data={pokemon.moves.map((item) => item.move.name)}
+        renderItem={renderItem}
+        keyExtractor={(moveName) => moveName}
       />
     </View>
   );
 };
 
 export const Info = () => {
-  const { id, name, url } = usePoke();
-
-  const [data, setData] = useState('');
-  const [abilities, setAbilities] = useState(['']);
-  const [moves, setMoves] = useState(['']);
+  const { url } = usePoke();
+  const [pokemon, setPokemon] = useState<PokeDetails>();
 
   useEffect(() => {
     //Async API call to pull in array of objects to display
     async function fetchData() {
       const pokeData = await fetch(url);
       const results: PokeDetails = await pokeData.json();
-      setAbilities(results.abilities.map((item) => item.ability.name));
-      setData(results.sprites.front_shiny);
-      setMoves(results.moves.map((item) => item.move.name));
+      setPokemon(results);
     }
     fetchData();
   }, [url]);
 
-  return (
-    <PokemonPage
-      name={name}
-      id={id}
-      abilities={abilities}
-      moves={moves}
-      data={data}
-    />
-  );
+  if (!pokemon) {
+    return <Text>Loading...</Text>;
+  }
+
+  return <PokemonPage pokemon={pokemon} />;
 };
